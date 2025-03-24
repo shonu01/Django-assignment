@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load blog_tags %}
+
+{% block title %}Post Catalog - Mini Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-md-8">
+        <h1 class="mb-4 text-white">Post Catalog</h1>
+
+        {% for category in categories %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">
+                    <a href="{% url 'category_detail' category.slug %}" class="text-decoration-none text-white">
+                        {{ category.name }}
+                    </a>
+                </h2>
+            </div>
+            <div class="card-body">
+                {% with category_posts=posts_by_category|get_item:category %}
+                {% if category_posts %}
+                    <div class="row">
+                        {% for post in category_posts %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card h-100">
+                                {% if post.featured_image %}
+                                <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h3 class="card-title h5">
+                                        <a href="{% url 'post_detail' post.slug %}" class="text-decoration-none text-white">
+                                            {{ post.title }}
+                                        </a>
+                                    </h3>
+                                    <p class="card-text text-white small">
+                                        By {{ post.author.username }} on {{ post.created_at|date:"F j, Y" }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <a href="{% url 'post_detail' post.slug %}" class="btn btn-primary">Read More</a>
+                                        <div class="text-white small">
+                                            <i class="bi bi-heart"></i> {{ post.total_likes }}
+                                            <i class="bi bi-chat"></i> {{ post.comments.count }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-white">No posts in this category yet.</p>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <!-- Popular Tags -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0 text-white">Popular Tags</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    {% for tag in popular_tags %}
+                    <a href="{% url 'tag_detail' tag.slug %}" class="badge bg-primary text-decoration-none text-white">
+                        {{ tag.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0 text-white">Search</h5>
+            </div>
+            <div class="card-body">
+                <form action="{% url 'search' %}" method="get">
+                    <div class="input-group">
+                        <input type="text" name="query" class="form-control" placeholder="Search posts...">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

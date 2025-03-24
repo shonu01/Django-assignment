@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-md-8">
+            {% for post in posts %}
+            <div class="card post-card">
+                <div class="card-body">
+                    <h2 class="post-title">
+                        <a href="{% url 'post_detail' post.slug %}" class="text-decoration-none text-white">{{ post.title }}</a>
+                    </h2>
+                    <div class="post-meta">
+                        <span class="author-info">By {{ post.author.get_full_name|default:post.author.username }}</span>
+                        <span class="date-info">{{ post.created_at|date:"F j, Y" }}</span>
+                    </div>
+                    <div class="post-content">
+                        {{ post.content|truncatewords:50 }}
+                    </div>
+                    <a href="{% url 'post_detail' post.slug %}" class="btn btn-primary">Read More</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-info">
+                No posts found.
+            </div>
+            {% endfor %}
+
+            <!-- Pagination -->
+            {% if posts.has_other_pages %}
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Previous</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in posts.paginator.page_range %}
+                    <li class="page-item {% if posts.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+
+                    {% if posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ posts.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.category %}&category={{ request.GET.category }}{% endif %}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Search Form -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h5 class="text-white">Search</h5>
+                </div>
+                <div class="sidebar-card-body">
+                    <form method="get" action="{% url 'home' %}" class="search-form">
+                        <div class="form-group">
+                            <input type="text" name="q" class="form-control" placeholder="Search posts..." value="{{ request.GET.q }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Categories -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h5 class="text-white">Categories</h5>
+                </div>
+                <div class="sidebar-card-body">
+                    <ul class="list-group">
+                        {% for category in categories %}
+                        <li class="list-group-item {% if category.slug == request.GET.category %}active{% endif %}">
+                            <a href="?category={{ category.slug }}" class="text-decoration-none text-white">{{ category.name }}</a>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-white">No categories found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Recent Posts -->
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h5 class="text-white">Recent Posts</h5>
+                </div>
+                <div class="sidebar-card-body">
+                    {% for post in recent_posts %}
+                    <div class="recent-post">
+                        <h6 class="recent-post-title">
+                            <a href="{% url 'post_detail' post.slug %}" class="text-decoration-none text-white">{{ post.title }}</a>
+                        </h6>
+                        <div class="recent-post-meta text-white">
+                            {{ post.created_at|date:"F j, Y" }}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-white">No recent posts.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
